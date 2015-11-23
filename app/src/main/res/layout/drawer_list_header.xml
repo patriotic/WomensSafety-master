@@ -1,14 +1,14 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="58dp"
+    android:layout_height="200dp"
+    android:background="@color/colorAccent"
     android:gravity="center"
     android:paddingTop="16dp"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     >
     <TextView
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

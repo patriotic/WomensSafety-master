@@ -3,8 +3,11 @@ package com.creative.womensafety;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
@@ -25,8 +28,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Ikhtiar on 11/9/2015.
@@ -88,11 +93,43 @@ public class MapsActivity extends FragmentActivity {
 
 
         sendRequestToServer(AppConstant.DirectionApiUrl(gps.getLatitude(), gps.getLongitude(), lattitude, langitude));
-        mMap.addMarker(new MarkerOptions().position(position).title("VICTIM"));
+
+        mMap.addMarker(new MarkerOptions().position(position).title(getLocationDetails(lattitude,langitude)));
         mMap.addMarker(new MarkerOptions().position(new LatLng(gps.getLatitude(),gps.getLongitude())).title("ME"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
 
 
+    }
+    private String getLocationDetails(double lat,double lang) {
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        String add="VICTIM";
+
+        List<Address> addresses  = null;
+        try {
+            addresses = geocoder.getFromLocation(lat, lang, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if(addresses!=null) {
+            String address = addresses.get(0).getAddressLine(0);
+            String knownName = addresses.get(0).getFeatureName();
+            String premises = addresses.get(0).getPremises();
+            String city = addresses.get(0).getLocality();
+            String state = addresses.get(0).getAdminArea();
+            String zip = addresses.get(0).getPostalCode();
+            String country = addresses.get(0).getCountryName();
+
+
+            if(address!=null && !address.isEmpty())add+="\n"+address;
+            if(knownName!=null && !knownName.isEmpty())add+="\n"+knownName;
+            if(premises!=null && !premises.isEmpty())add+="\n"+premises;
+            if(zip!=null && !zip.isEmpty())add+="\n"+zip;
+            if(state!=null && !state.isEmpty())add+="\n"+state;
+            if(city!=null && !city.isEmpty())add+="\n"+city;
+            if(country!=null && !country.isEmpty())add+="\n"+country;
+        }
+        return add;
     }
 
 

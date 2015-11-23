@@ -2,14 +2,19 @@ package com.creative.womensafety;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -17,7 +22,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.creative.womensafety.appdata.AppController;
-import com.creative.womensafety.drawer.Drawer_Data;
 import com.creative.womensafety.receiver.ScreenOnOffReceiver;
 import com.creative.womensafety.userview.LoginOrSingupActivity;
 import com.creative.womensafety.utils.CheckDeviceConfig;
@@ -26,10 +30,13 @@ import com.creative.womenssafety.R;
 import com.creative.womensafety.appdata.AppConstant;
 import com.creative.womensafety.service.LockScreenService;
 import com.creative.womensafety.sharedprefs.SaveManager;
-import com.creative.womensafety.drawer.Drawer_item;
 import com.creative.womensafety.drawer.Drawer_list_adapter;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,9 +51,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String gcmRegId;
 
     private Button btn_helpMe;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
 
-    private ListView drawer_list;
+    private ExpandableListView drawer_list;
     private Drawer_list_adapter drawer_adapter_custom;
+    List<String> listDataHeader;
+    HashMap<String, List<String>> listDataChild;
+
+    private Toolbar toolbar;
 
     GPSTracker gps;
 
@@ -87,56 +100,98 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void init() {
 
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         btn_helpMe = (Button) findViewById(R.id.btnHelpMe);
         btn_helpMe.setOnClickListener(this);
+
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.nav_icon_inactive);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+        ) {
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.nav_icon_inactive);
+            }
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.nav_icon_active);
+            }
+        };
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
         setDrawer();
+
+
     }
 
+
+
+
+    private void prepareListData() {
+        listDataHeader = new ArrayList<String>();
+        listDataChild = new HashMap<String, List<String>>();
+
+        // Adding child data
+
+        listDataHeader.add("HOW TO USE");
+        listDataHeader.add("INFORMATION");
+        listDataHeader.add("LOGOUT");
+        listDataHeader.add("EXIT");
+        // Adding child data
+        List<String> info = new ArrayList<String>();
+        info.add("HOSPITAL");
+        info.add("POLICE");
+        info.add("FIRE SERVICE");
+
+
+        listDataChild.put(listDataHeader.get(1), info); // Header, Child data
+//        listDataChild.put(listDataHeader.get(1), others);
+    }
     protected void setDrawer(){
-
-        ArrayList<Drawer_item> item_list = new ArrayList<>();
-        for(int i=0;i< Drawer_Data.drawer_list_text.length;i++){
-            item_list.add(new Drawer_item(Drawer_Data.drawer_list_text[i],Drawer_Data.drawer_list_image[i]));
-        }
-
-        drawer_list = (ListView) findViewById(R.id.left_drawer);
+        prepareListData();
+        drawer_list = (ExpandableListView) findViewById(R.id.left_drawer);
         LayoutInflater inflater = getLayoutInflater();
         ViewGroup header = (ViewGroup) inflater.inflate(R.layout.drawer_list_header, drawer_list, false);
 
 
-        drawer_adapter_custom = new Drawer_list_adapter(this,R.layout.drawer_list_item,item_list);
+        drawer_adapter_custom = new Drawer_list_adapter(this,listDataHeader,listDataChild);
         drawer_list.addHeaderView(header, null, false);
         drawer_list.setAdapter(drawer_adapter_custom);
 
-        drawer_list.setOnItemClickListener(new DrawerItemClickListener());
-    }
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
-        }
-    }
-    private void selectItem(int position){
-        switch(position){
-            case 1:
-                Toast.makeText(this,"Hospital",Toast.LENGTH_SHORT).show();
-                break;
-            case 2:
-                Toast.makeText(this,"POLICE",Toast.LENGTH_SHORT).show();
-                break;
-            case 3:
-                Toast.makeText(this,"HOW TO USE",Toast.LENGTH_SHORT).show();
-                break;
-            case 4:
-                Toast.makeText(this,"LOGOUT",Toast.LENGTH_SHORT).show();
-                break;
-            case 5:
-                Toast.makeText(this,"Exit",Toast.LENGTH_SHORT).show();
-                break;
-
-        }
+        drawer_list.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                Toast.makeText(
+                        getApplicationContext(),
+                        listDataHeader.get(groupPosition)
+                                + " : "
+                                + listDataChild.get(
+                                listDataHeader.get(groupPosition)).get(
+                                childPosition), Toast.LENGTH_SHORT)
+                        .show();
+                return false;
+            }
+        });
+        drawer_list.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
+                Toast.makeText(getApplicationContext(), "" + listDataHeader.get(i), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
     }
 
     @Override
@@ -202,6 +257,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mScreenStateReceiver);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        // Handle your other action bar items...
+
+        return super.onOptionsItemSelected(item);
     }
 }
 
