@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private CheckDeviceConfig checkDeviceConfig;
 
 
-    ScreenOnOffReceiver mScreenStateReceiver;
+//    ScreenOnOffReceiver mScreenStateReceiver;
 
     private SaveManager saveManager;
 
@@ -88,15 +88,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void registerReceiverForHomeButtonAction() {
 
-        mScreenStateReceiver = new ScreenOnOffReceiver();
+//        mScreenStateReceiver = new ScreenOnOffReceiver();
 
         //registerReceiver(mScreenStateReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
         //registerReceiver(mScreenStateReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(mScreenStateReceiver, filter);
+//        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+//        filter.addAction(Intent.ACTION_SCREEN_OFF);
+//        registerReceiver(mScreenStateReceiver, filter);
     }
 
 
@@ -132,10 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         setDrawer();
-
-
     }
-
 
 
 
@@ -256,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mScreenStateReceiver);
+//        unregisterReceiver(mScreenStateReceiver);
     }
 
     @Override

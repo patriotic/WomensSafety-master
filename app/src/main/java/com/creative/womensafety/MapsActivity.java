@@ -102,7 +102,7 @@ public class MapsActivity extends FragmentActivity {
     }
     private String getLocationDetails(double lat,double lang) {
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        String add="VICTIM";
+        String add="VICTIM ";
 
         List<Address> addresses  = null;
         try {
@@ -121,13 +121,13 @@ public class MapsActivity extends FragmentActivity {
             String country = addresses.get(0).getCountryName();
 
 
-            if(address!=null && !address.isEmpty())add+="\n"+address;
-            if(knownName!=null && !knownName.isEmpty())add+="\n"+knownName;
-            if(premises!=null && !premises.isEmpty())add+="\n"+premises;
-            if(zip!=null && !zip.isEmpty())add+="\n"+zip;
-            if(state!=null && !state.isEmpty())add+="\n"+state;
-            if(city!=null && !city.isEmpty())add+="\n"+city;
-            if(country!=null && !country.isEmpty())add+="\n"+country;
+            if(address!=null && !address.isEmpty())add+=","+address;
+//            if(knownName!=null && !knownName.isEmpty())add+=","+knownName;
+//            if(premises!=null && !premises.isEmpty())add+=","+premises;
+            if(zip!=null && !zip.isEmpty())add+=","+zip;
+            if(state!=null && !state.isEmpty())add+=","+state;
+            if(city!=null && !city.isEmpty())add+=","+city;
+            if(country!=null && !country.isEmpty())add+=","+country;
         }
         return add;
     }
